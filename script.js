@@ -8,7 +8,7 @@ xhttpr.onload = ()=> {
 	if (xhttpr.status == 200){
 		const response = JSON.parse(xhttpr.response);
 		const list = response["data"];
-		let x = "<tr><td style='width:15%;'><strong>路線</strong></td><td style='width:40%;'><strong>起點</strong></td><td style='width:40%;'><strong>終點</strong></td></tr>";
+		let x = "<tr><td style='width:14%;'><strong>路線</strong></td><td style='width:43%;'><strong>起點</strong></td><td style='width:43%;'><strong>終點</strong></td></tr>";
 		
 		list.sort(function(a, b) {
 			var routeA = String(a["route"]);
