@@ -42,7 +42,7 @@ xhttpr.onload = ()=> {
 		document.getElementById("listTable").innerHTML = x;
 		document.getElementById("routeList").style.display = "block";
 
-		document.getElementById("loading").style.display = "none";
+		document.getElementById("waiting").style.display = "none";
 	} else {
 		//idk do sth
 	}
@@ -56,6 +56,7 @@ function hptoHome(){
 // find all stops of a route given the route and direction
 function routeStop(route, direction){
 	document.getElementById("routeList").style.display = "none";
+	document.getElementById("routeSearch").style.display = "none";
 	document.getElementById("loading").style.display = "block";
 	
 	const url = "https://rt.data.gov.hk/v2/transport/citybus/route-stop/ctb/" + route + "/" + direction;
@@ -173,8 +174,8 @@ function routeStopEta (stopId, route, direction, stopName){
 					x = x + "<tr><td>" + (i + 1) + "</td><td>" + departureList[i]["dest_tc"] + "</td><td>" + etaTime + "</td></tr>";
 				}
 			}
-			document.getElementById("listTable").innerHTML = x;
-			document.getElementById("routeList").style.display = "block";
+			document.getElementById("stationTable").innerHTML = x;
+			document.getElementById("stationList").style.display = "block";
 			document.getElementById("loading").style.display = "none";
 			document.getElementById("stopName").innerHTML = "巴士站： " + stopName;
 		}
