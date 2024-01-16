@@ -82,12 +82,13 @@ width: 100%;
 }
 
 .timetable td {
-//border: 1px solid #ddd;
-padding: 8px 8px;
-text-align: left;
-background-color: #04AA6D;
-color: white;
-font-size: 20px;
+	//border: 1px solid #ddd;
+	padding: 8px 8px;
+	text-align: left;
+	background-color: #04AA6D;
+	color: white;
+	font-size: 22px;
+	white-space: normal;
 } 
 
 .datetable {
@@ -139,13 +140,14 @@ margin: 0;
 	border-right: none;
 	color: white;
 	text-decoration: none;
-	/*font-size: 24px;*/
+	font-size: 18px;
 	text-align: left;
 	width: 100%;
 	display: inline-block;
 	margin: 2px 2px;
 	transition-duration: 0.4s;
 	cursor: pointer;
+	white-space: normal;
 }
 
 .btnEta{
