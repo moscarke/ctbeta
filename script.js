@@ -8,7 +8,7 @@ xhttpr.onload = ()=> {
 	if (xhttpr.status == 200){
 		const response = JSON.parse(xhttpr.response);
 		const list = response["data"];
-		let x = "<tr><td><strong>路線編號</strong></td><td><strong>起點</strong></td><td><strong>終點</strong></td></tr>";
+		let x = "<tr><td style='width:15%;'><strong>路線</strong></td><td style='width:40%;'><strong>起點</strong></td><td style='width:40%;'><strong>終點</strong></td></tr>";
 		
 		list.sort(function(a, b) {
 			var routeA = String(a["route"]);
@@ -85,7 +85,7 @@ function routeStop(route, direction){
 }
 
 function finishRouteStop(stationNameList, route, direction){
-	let x = "<tr><td><strong>站號</strong></td><td><strong>巴士站</strong></td><td><strong>到站時間</strong></td></tr>";
+	let x = "<tr><td><strong></strong></td><td><strong>巴士站</strong></td><td><strong>到站時間</strong></td></tr>";
 	stationNameList.sort(function(a, b) {
 		var routeA = String(a["number"]);
 		var routeB = String(b["number"]);
