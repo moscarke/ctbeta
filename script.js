@@ -200,6 +200,7 @@ function routeStopEta (stopId, route, direction, stopName){
 			}
 			document.getElementById("stationTable").innerHTML = x;
 			document.getElementById("stationList").style.display = "block";
+			document.getElementById("allEta").onclick = function () {allEta(stopId)};
 			document.getElementById("backRoute").style.display = "flex";
 			document.getElementById("loading").style.display = "none";
 			document.getElementById("stopName").innerHTML = "巴士站： " + stopName;
@@ -293,7 +294,7 @@ function allEta(stopId){
 			document.getElementById("stationList").style.display = "block";
 			//document.getElementById("backRoute").style.display = "flex";
 			document.getElementById("loading").style.display = "none";
-			//document.getElementById("stopName").innerHTML = "巴士站： " + stopName;
+			//document.getElementById("allEta").onclick = "allEta('" + stopId + "');";
 		}
 	}
 }
