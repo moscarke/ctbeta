@@ -57,6 +57,7 @@ function hptoHome(){
 function routeStop(route, direction){
 	document.getElementById("routeList").style.display = "none";
 	document.getElementById("routeSearch").style.display = "none";
+	document.getElementById("routeSearch").value = "";
 	document.getElementById("loading").style.display = "block";
 	
 	const url = "https://rt.data.gov.hk/v2/transport/citybus/route-stop/ctb/" + route + "/" + direction;
@@ -79,6 +80,19 @@ function routeStop(route, direction){
 						finishRouteStop(stationNameList, route, direction);
 					}
 				});
+			}
+			if (stationList.length == 0){
+				let oppositeDirection;
+				if (direction == "inbound"){
+					oppositeDirection = "outbound";
+				} else {
+					oppositeDirection = "inbound";
+				}
+				let x = "<tr><td><strong>此路線沒有此方向</strong></td></tr><tr><td><input class='btnOrigin' type='button' value='按此搜尋相反方向' onclick=\"routeStop('" + route + "', '" + oppositeDirection + "')\"</td></tr>";
+				document.getElementById("listTable").innerHTML = x;
+				document.getElementById("routeList").style.display = "block";
+				document.getElementById("loading").style.display = "none";
+				document.getElementById("routeNumber").innerHTML = "路線： " + route;
 			}
 		}
     }
@@ -140,12 +154,16 @@ function stopInfo(stopId, callback){
 function routeStopEta (stopId, route, direction, stopName){
 	document.getElementById("routeList").style.display = "none";
 	document.getElementById("loading").style.display = "block";
-	let dir;
+	document.getElementById("stationList").style.display = "none";
+	let dir, oppositeDirection;
+	console.log(stopId, route, direction);
 	
 	if (direction == "inbound"){
 		dir = "I";
+		oppositeDirection = "outbound";
 	} else {
 		dir = "O";
+		oppositeDirection = "inbound";
 	}
 	
 	const url = "https://rt.data.gov.hk/v2/transport/citybus/eta/ctb/" + stopId + "/" + route;
@@ -161,21 +179,28 @@ function routeStopEta (stopId, route, direction, stopName){
 		if (xhttpr.status == 200){
 			const response = JSON.parse(xhttpr.response);
 			const departureList = response["data"];
+			let sequence = 0;
+			departureList.sort(function(a, b) {
+				return parseFloat(a["eta_seq"]) - parseFloat(b["eta_seq"]);
+			});
 			for (let i = 0; i < departureList.length; i++){
 				if (departureList[i]["dir"] == dir){
-					if (departureList[i]["rmk_en"] == "KMB Cycle"){
-						etaTime = "九巴時段，請參考九巴介面";
-					} else if (departureList[i]["eta"] == ""){
-						etaTime = "沒有數據"
+					if (departureList[i]["eta"] == ""){
+						etaTime = departureList[i]["rmk_tc"] + "（沒有資料）";
 					} else {
 						etaTime = new Date(departureList[i]["eta"]);
 						etaTime = etaTime.toLocaleTimeString('en-HK', {hourCycle: 'h23'});
 					}
-					x = x + "<tr><td>" + (i + 1) + "</td><td>" + departureList[i]["dest_tc"] + "</td><td>" + etaTime + "</td></tr>";
+					sequence++;
+					x = x + "<tr><td>" + sequence + "</td><td>" + departureList[i]["dest_tc"] + "</td><td>" + etaTime + "</td></tr>";
 				}
+			}
+			if (x == "<tr><td><strong></strong></td><td><strong>目的地</strong></td><td><strong>到站時間</strong></td></tr>"){
+				x = "<tr><td><strong>未來60分鐘沒有由此站開出的班次</strong></td><td><input type='button' class='btnEta' value='循環線請按此' onclick=\"routeStopEta('" + stopId + "', '" + route + "', '" + oppositeDirection + "', '" + stopName + "')\" ></td><tr>";
 			}
 			document.getElementById("stationTable").innerHTML = x;
 			document.getElementById("stationList").style.display = "block";
+			document.getElementById("backRoute").style.display = "flex";
 			document.getElementById("loading").style.display = "none";
 			document.getElementById("stopName").innerHTML = "巴士站： " + stopName;
 		}
@@ -198,6 +223,78 @@ function searchRoute(){
 			  tr[i].style.display = "none";
 		  }
 		}       
+	}
+}
+
+function backToStopList(){
+	document.getElementById("routeList").style.display = "block";
+	document.getElementById("stationList").style.display = "none";
+	document.getElementById("backRoute").style.display = "none";
+}
+
+function allEta(stopId){
+	document.getElementById("stationList").style.display = "none";
+	document.getElementById("backRoute").style.display = "none";
+	document.getElementById("routeList").style.display = "none";
+	document.getElementById("routeNumber").style.display = "none";
+	document.getElementById("loading").style.display = "block";
+	document.getElementById("stationList").style.display = "none";
+	let dir, oppositeDirection;
+	console.log(stopId);
+	
+	
+	const url = "https://rt.data.gov.hk/v1/transport/batch/stop-eta/ctb/" + stopId + "?lang=zh-hant";
+	const xhttpr = new XMLHttpRequest();
+	xhttpr.open("GET", url, true);
+	
+	let x = "<tr><td><strong>路線</strong></td><td><strong>目的地</strong></td><td><strong>到站時間</strong></td></tr>";
+	let etaTime;
+
+	xhttpr.send();
+
+	xhttpr.onload = ()=> {
+		if (xhttpr.status == 200){
+			const response = JSON.parse(xhttpr.response);
+			const departureList = response["data"];
+			departureList.sort(function(a, b) {
+				var routeA = String(a["route"]);
+				var routeB = String(b["route"]);
+
+				var numA = parseInt(routeA, 10);
+				var numB = parseInt(routeB, 10);
+				var alphaA = routeA.replace(numA, "");
+				var alphaB = routeB.replace(numB, "");
+
+				if (numA < numB) {
+					return -1;
+				} else if (numA > numB) {
+					return 1;
+				}
+
+				if (alphaA < alphaB) {
+					return -1;
+				} else if (alphaA > alphaB) {
+					return 1;
+				}
+
+				return 0;
+			});
+			for (let i = 0; i < departureList.length; i++){
+				if (departureList[i]["eta"] == ""){
+					etaTime = departureList[i]["rmk"] + "（沒有資料）";
+				} else {
+					etaTime = new Date(departureList[i]["eta"]);
+					etaTime = etaTime.toLocaleTimeString('en-HK', {hourCycle: 'h23'});
+				}
+				//sequence++;
+				x = x + "<tr><td>" + departureList[i]["route"] + "</td><td>" + departureList[i]["dest"] + "</td><td>" + etaTime + "</td></tr>";
+			}
+			document.getElementById("stationTable").innerHTML = x;
+			document.getElementById("stationList").style.display = "block";
+			//document.getElementById("backRoute").style.display = "flex";
+			document.getElementById("loading").style.display = "none";
+			//document.getElementById("stopName").innerHTML = "巴士站： " + stopName;
+		}
 	}
 }
 
