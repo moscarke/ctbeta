@@ -1,5 +1,7 @@
 const url = "https://rt.data.gov.hk/v2/transport/citybus/route/ctb";
 const xhttpr = new XMLHttpRequest();
+const routeList = [];
+let apiResponded = 0;
 xhttpr.open("GET", url, true);
 
 xhttpr.send();
@@ -8,44 +10,81 @@ xhttpr.onload = ()=> {
 	if (xhttpr.status == 200){
 		const response = JSON.parse(xhttpr.response);
 		const list = response["data"];
-		let x = "<tr><td style='width:14%;'><strong>路線</strong></td><td style='width:43%;'><strong>起點</strong></td><td style='width:43%;'><strong>終點</strong></td></tr>";
-		
-		list.sort(function(a, b) {
-			var routeA = String(a["route"]);
-			var routeB = String(b["route"]);
-
-			var numA = parseInt(routeA, 10);
-			var numB = parseInt(routeB, 10);
-			var alphaA = routeA.replace(numA, "");
-			var alphaB = routeB.replace(numB, "");
-
-			if (numA < numB) {
-				return -1;
-			} else if (numA > numB) {
-				return 1;
-			}
-
-			if (alphaA < alphaB) {
-				return -1;
-			} else if (alphaA > alphaB) {
-				return 1;
-			}
-
-			return 0;
-		});
-
-		for (let i = 0;i < list.length; i++){
-			x = x + "<tr><td>" + list[i]["route"] + "</td><td><input class='btnOrigin' type='button' value='往： " + list[i]["orig_tc"] + "' onclick=\"routeStop('" + list[i]["route"] + "', 'inbound')\"></td>";
-			x = x + "<td><input class='btnOrigin' type='button' value='往： " + list[i]["dest_tc"] + "' onclick=\"routeStop('" + list[i]["route"] + "', 'outbound')\"></td></tr>";
+		for (let i = 0; i < list.length; i++){
+			routeInfo(list[i]["route"], "inbound", function(data){
+				apiResponded++;
+				if (data != ""){
+					routeList.push({route: list[i]["route"], dest_tc: list[i]["dest_tc"], orig_tc: list[i]["orig_tc"].split("(經")[0], dir: "I"});
+				}
+				if (apiResponded == list.length){
+					finishRoute(routeList);
+				}
+			});
+			routeInfo(list[i]["route"], "outbound", function(data){
+				apiResponded++;
+				if (data != ""){
+					routeList.push({route: list[i]["route"], orig_tc: list[i]["dest_tc"].split("(經")[0], dest_tc: list[i]["orig_tc"], dir: "I"});
+				}
+				if (apiResponded == list.length){
+					finishRoute(routeList);
+				}
+			});
 		}
-		
-		document.getElementById("listTable").innerHTML = x;
-		document.getElementById("routeList").style.display = "block";
-
-		document.getElementById("waiting").style.display = "none";
 	} else {
 		//idk do sth
 	}
+}
+
+function finishRoute (routeList){
+	let x = "<tr><td style='width:14%;'><strong>路線</strong></td><td style='width:86%;'><strong>方向</strong></td></tr>";
+	routeList.sort(function(a, b) {
+		var routeA = String(a["route"]);
+		var routeB = String(b["route"]);
+
+		var numA = parseInt(routeA, 10);
+		var numB = parseInt(routeB, 10);
+		var alphaA = routeA.replace(numA, "");
+		var alphaB = routeB.replace(numB, "");
+
+		if (numA < numB) {
+			return -1;
+		} else if (numA > numB) {
+			return 1;
+		}
+
+		if (alphaA < alphaB) {
+			return -1;
+		} else if (alphaA > alphaB) {
+			return 1;
+		}
+
+		return 0;
+	});
+	for (let i = 0;i < routeList.length; i++){
+		dir = routeList[i]["dir"];
+		x = x + "<tr><td>" + routeList[i]["route"] + "</td><td>";
+		x = x + "<button class='btnOrigin' type='button' onclick=\"routeStop('" + routeList[i]["route"] + "', '" + dir + "', '" + routeList[i]["service_type"] + "')\"><p style='font-size: 75%;margin: 0px 0px'>" + routeList[i]["orig_tc"] + "</p><p style='margin: 0px 0px'><span style='font-size: 75%'>往</span> " + routeList[i]["dest_tc"] + "</p></button></td></tr>";
+	}
+	
+	document.getElementById("listTable").innerHTML = x;
+	document.getElementById("routeList").style.display = "block";
+
+	document.getElementById("waiting").style.display = "none";
+}
+
+function routeInfo(route, direction, callback){
+	const url = "https://rt.data.gov.hk/v2/transport/citybus/route-stop/ctb/" + route + "/" + direction;
+	const xhttpr = new XMLHttpRequest();
+	xhttpr.open("GET", url, true);
+
+	xhttpr.onload = function() {
+		if (xhttpr.status === 200) {
+			const response = JSON.parse(xhttpr.responseText);
+			callback(response["data"]);
+		}
+	};
+
+	xhttpr.send();
 }
 
 

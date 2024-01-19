@@ -88,12 +88,16 @@ cursor: pointer;
 	text-align: left;
 	/*background-color: #04AA6D;*/
 	color: white;
-	font-size: 20px;
+	font-size: 24px;
 	white-space: normal;
 } 
 
 .timetable input{
-	font-size: 20px;
+	font-size: 24px;
+}
+
+.timetable button{
+	font-size: 24px;
 }
 
 .timetable tr{
@@ -101,6 +105,11 @@ cursor: pointer;
 }
 
 .timetable tr input{
+	background-color: #04AA6D;
+	border-color: #04AA6D;
+}
+
+.timetable tr button{
 	background-color: #04AA6D;
 	border-color: #04AA6D;
 }
@@ -114,9 +123,15 @@ cursor: pointer;
 	border-color: #3fc300;
 }
 
+.timetable tr:nth-child(even) button{
+	background-color: #3fc300;
+	border-color: #3fc300;
+}
+
 .timetable tr:nth-child(1){
 	background-color: #017300;
 }
+
 
 .datetable {
 font-family: Arial, Helvetica, sans-serif;
